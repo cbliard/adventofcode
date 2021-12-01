@@ -40,30 +40,41 @@ RSpec.describe "count_sonar_depth_sliding_increases" do
 end
 
 
-def count_sonar_depth_increases(io = nil)
-  if io.nil?
-    return open(File.join(__dir__, "challenge1-input.txt")) { |f| count_sonar_depth_increases(f) }
+def count_sonar_depth_increases(input = nil)
+  with_input_data(input) do |data|
+    read_measures(data)
+      .then { count_increases(_1) }
   end
+end
 
-  io.readlines
-    .map(&:to_i)
-    .each_cons(2)
+def count_sonar_depth_sliding_increases(input = nil)
+  with_input_data(input) do |data|
+    read_measures(data)
+      .then { sum_each_cons_3(_1) }
+      .then { count_increases(_1) }
+  end
+end
+
+def read_measures(text)
+  text.readlines.map(&:to_i)
+end
+
+def sum_each_cons_3(array)
+  array.each_cons(3).map(&:sum)
+end
+
+def count_increases(array)
+  array.each_cons(2)
     .map { |a, b| { -1 => "increased", 0 => "same", 1 => "decreased" }[a <=> b] }
     .count("increased")
 end
 
-def count_sonar_depth_sliding_increases(io = nil)
-  if io.nil?
-    return open(File.join(__dir__, "challenge1-input.txt")) { |f| count_sonar_depth_sliding_increases(f) }
+def with_input_data(source)
+  if source.nil?
+    open(File.join(__dir__, "challenge1-input.txt")) { |measures| yield measures }
+  else
+    yield source
   end
-
-  io.readlines
-    .map(&:to_i)
-    .each_cons(3)
-    .map(&:sum)
-    .each_cons(2)
-    .map { |a, b| { -1 => "increased", 0 => "same", 1 => "decreased" }[a <=> b] }
-    .count("increased")
 end
 
 if $0 == __FILE__
