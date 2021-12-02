@@ -1,22 +1,27 @@
 # frozen_string_literal: true
 require 'rspec'
 
-RSpec.describe "Day3" do
+RSpec.describe "Day xxx" do
   let(:sample_input) do
     <<~INPUT
+      copy_sample_input_here
     INPUT
+  end
+
+  it "has sample input ready" do
+    expect(sample_input).not_to match(/copy_sample_input_here/)
   end
 
   describe "solve_part1" do
     subject { solve_part1(sample_input) }
 
-    it { is_expected.to eq("xxx") }
+    it { is_expected.to eq("copy_solution_of_part_1_example_here") }
   end
 
-  describe "solve_part2" do
+  xdescribe "solve_part2" do
     subject { solve_part2(sample_input) }
 
-    it { is_expected.to eq("xxx") }
+    it { is_expected.to eq("copy_solution_of_part_2_example_here") }
   end
 end
 
@@ -45,6 +50,7 @@ end
 
 if $0 == __FILE__
   RSpec.configure do |c|
+    c.fail_fast = true
     c.formatter = "documentation"
   end
   rspec_result = RSpec::Core::Runner.run([])

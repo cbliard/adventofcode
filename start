@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(cd "$(dirname $0)" && pwd)"
+
+day=$(date '+%-d')
+dir="day${day}"
+challenge="$dir/challenge.rb"
+input="$dir/input.txt"
+challenge_url="https://adventofcode.com/2021/day/$day"
+
+[ -d "$dir" ] || cp -r template "$dir"
+if grep -q "Day xxx" "$challenge"; then
+  echo "-- Create $challenge"
+  sed "s/Day xxx/Day $day/" "$challenge" > "$challenge.tmp"
+  mv "$challenge.tmp" "$challenge"
+fi
+
+if ! [ -f "$input" ]; then
+  echo "-- Fetch $input"
+  source $HOME/.env.adventofcode
+  curl \
+    --header "Cookie: session=$ADVENT_OF_CODE_SESSION" \
+    --output "$input" \
+    --silent \
+    "$challenge_url/input"
+fi
+
+echo "-- Open challenge page"
+open $challenge_url
+
+echo "-- Open editor"
+code .
+code --reuse-window "$challenge"
+
+echo "-- Test & Run challenge"
+exec watchexec --watch . --exts rb -- ruby "$challenge"
