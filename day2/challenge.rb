@@ -14,15 +14,15 @@ RSpec.describe "Day2" do
   end
 
   describe "solve_part1" do
-    it "returns 150" do
-      expect(solve_part1(sample_input)).to eq(150)
-    end
+    subject { solve_part1(sample_input) }
+
+    it { is_expected.to eq(150) }
   end
 
   describe "solve_part2" do
-    it "returns 900" do
-      expect(solve_part2(sample_input)).to eq(900)
-    end
+    subject { solve_part2(sample_input) }
+
+    it { is_expected.to eq(900) }
   end
 end
 
@@ -84,6 +84,9 @@ def with(input)
 end
 
 if $0 == __FILE__
+  RSpec.configure do |c|
+    c.formatter = "documentation"
+  end
   rspec_result = RSpec::Core::Runner.run([])
   if rspec_result == 0
     puts "part 1 solution: #{solve_part1}"
