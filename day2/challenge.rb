@@ -18,6 +18,12 @@ RSpec.describe "Day2" do
       expect(solve_part1(sample_input)).to eq(150)
     end
   end
+
+  describe "solve_part2" do
+    it "returns 900" do
+      expect(solve_part2(sample_input)).to eq(900)
+    end
+  end
 end
 
 
@@ -33,7 +39,38 @@ def solve_part1(input = nil)
   end
 end
 
+def aim(command, amount)
+  case command
+  when "forward" then 0
+  when "down" then amount
+  when "up" then -amount
+  end
+end
+
+def forward(command, amount, aim)
+  case command
+  when "forward" then { x: amount, depth: aim*amount }
+  else {}
+  end
+end
+
 def solve_part2(input = nil)
+  with(input) do |io|
+    aim = 0
+    commands =
+      io.readlines
+        .map(&:split)
+        .map { [_1, _2.to_i] }
+        .map { |command, amount|
+          aim += aim(command, amount)
+          forward(command, amount, aim)
+        }
+        .reject(&:empty?)
+
+    x = commands.map { _1[:x] }.sum
+    depth = commands.map { _1[:depth] }.sum
+    x * depth
+  end
 end
 
 def with(input)
