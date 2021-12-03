@@ -140,21 +140,7 @@ def solve_part2(input = nil)
     lines = io.readlines
     oxygen_rating = oxygen_rating(lines).to_i(2)
     co2_rating = co2_rating(lines).to_i(2)
-    return oxygen_rating * co2_rating
-
-    bits = lines.map { _1.strip.split("").map(&:to_i) }
-      .transpose
-    bits_sum = bits.map(&:sum)
-    most_common_bits = bits_sum.map { |sum| sum >= lines.count / 2 ? 1 : 0 }
-    return bits_sum
-    return most_common_bits
-    least_common_bits = bits_sum.map { |sum| sum < lines.count / 2 ? 1 : 0 }
-
-    gamma = most_common_bits.map(&:to_s).join
-    epsilon = least_common_bits.map(&:to_s).join
-
-    oxygen_generator_rating = find_min_start_with(gamma, lines)
-
+    oxygen_rating * co2_rating
   end
 end
 
