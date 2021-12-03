@@ -107,7 +107,7 @@ def solve_part1(input = nil)
   end
 end
 
-def oxygen_rating(numbers)
+def rating(numbers, &block)
   return "" if numbers.empty?
   return numbers.first if numbers.count == 1
   return 'error' if numbers.first.empty?
@@ -117,27 +117,21 @@ def oxygen_rating(numbers)
     head, tail = number.split("", 2)
     groups[head] << tail
   end
-  if groups["0"].count > groups["1"].count
-    "0" + oxygen_rating(groups["0"])
-  else
-    "1" + oxygen_rating(groups["1"])
+
+  digit = block.call(groups["0"].count, groups["1"].count)
+
+  digit + rating(groups[digit], &block)
+end
+
+def oxygen_rating(numbers)
+  rating(numbers) do |leading_0_count, leading_1_count|
+    leading_0_count > leading_1_count ? "0" : "1"
   end
 end
 
 def co2_rating(numbers)
-  return "" if numbers.empty?
-  return numbers.first if numbers.count == 1
-  return 'error' if numbers.first.empty?
-
-  groups = { "0" => [], "1" => [] }
-  numbers.each do |number|
-    head, tail = number.split("", 2)
-    groups[head] << tail
-  end
-  if groups["0"].count <= groups["1"].count
-    "0" + co2_rating(groups["0"])
-  else
-    "1" + co2_rating(groups["1"])
+  rating(numbers) do |leading_0_count, leading_1_count|
+    leading_0_count <= leading_1_count ? "0" : "1"
   end
 end
 
