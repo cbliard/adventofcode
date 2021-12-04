@@ -18,14 +18,14 @@ RSpec.describe "Day xxx" do
   describe "solve_part1" do
     subject { solve_part1(sample_input).to_s }
 
-    it { is_expected.to eq(PART_1_EXAMPLE_SOLUTION) }
+    it { is_expected.to eq(PART_1_EXAMPLE_SOLUTION.to_s) }
   end
 
   if PART_2_EXAMPLE_SOLUTION
     describe "solve_part2" do
       subject { solve_part2(sample_input).to_s }
 
-      it { is_expected.to eq(PART_2_EXAMPLE_SOLUTION) }
+      it { is_expected.to eq(PART_2_EXAMPLE_SOLUTION.to_s) }
     end
   end
 end
