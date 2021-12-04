@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(cd "$(dirname $0)" && pwd)"
+
+day=$(date '+%-d')
+dir="day${day}"
+challenge="$dir/challenge.rb"
+
+echo "-- Test & Run challenge"
+exec watchexec --watch . --exts rb -- ruby "$challenge"
