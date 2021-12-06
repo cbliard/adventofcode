@@ -57,7 +57,7 @@ def with(input)
   end
 end
 
-if $0 == __FILE__
+def run_rspec
   RSpec.configure do |c|
     c.fail_fast = true
     c.formatter = "documentation"
@@ -68,10 +68,28 @@ if $0 == __FILE__
     end
   end
   rspec_result = RSpec::Core::Runner.run([])
-  if rspec_result == 0
-    Timeout::timeout(TIMEOUT_SECONDS * 2) {
-      puts "part 1 solution: #{solve_part1}" if PART_1_EXAMPLE_SOLUTION
-      puts "part 2 solution: #{solve_part2}" if PART_2_EXAMPLE_SOLUTION
-    }
+  exit rspec_result if rspec_result != 0
+end
+
+def run_challenge
+  [
+    [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+  ].each do |part, part_implemented, solver|
+    next unless part_implemented
+
+    puts
+    puts "==== PART #{part} ===="
+    realtime = Benchmark.realtime do
+      Timeout::timeout(TIMEOUT_SECONDS) do
+        puts "answer: #{send(solver)}"
+      end
+    end
+    puts "took: #{"%0.2f" % (realtime * 1000)}ms"
   end
+end
+
+if $0 == __FILE__
+  run_rspec
+  run_challenge
 end
