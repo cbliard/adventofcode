@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 require 'rspec'
+require 'timeout'
 
 PART_1_EXAMPLE_SOLUTION = nil
 PART_2_EXAMPLE_SOLUTION = nil
+TIMEOUT_SECONDS = 5
 
 RSpec.describe "Day xxx" do
   let(:sample_input) do
@@ -59,10 +61,17 @@ if $0 == __FILE__
   RSpec.configure do |c|
     c.fail_fast = true
     c.formatter = "documentation"
+    c.around(:each) do |example|
+      Timeout::timeout(TIMEOUT_SECONDS) {
+        example.run
+      }
+    end
   end
   rspec_result = RSpec::Core::Runner.run([])
   if rspec_result == 0
-    puts "part 1 solution: #{solve_part1}" if PART_1_EXAMPLE_SOLUTION
-    puts "part 2 solution: #{solve_part2}" if PART_2_EXAMPLE_SOLUTION
+    Timeout::timeout(TIMEOUT_SECONDS * 2) {
+      puts "part 1 solution: #{solve_part1}" if PART_1_EXAMPLE_SOLUTION
+      puts "part 2 solution: #{solve_part2}" if PART_2_EXAMPLE_SOLUTION
+    }
   end
 end
