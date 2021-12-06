@@ -27,12 +27,12 @@ if ! [ -f "$input" ]; then
     "$challenge_url/input"
 fi
 
-echo "-- Open challenge page"
-open $challenge_url
-
 echo "-- Open editor"
 code .
 code --reuse-window "$challenge"
+
+echo "-- Open challenge page"
+open $challenge_url
 
 echo "-- Test & Run challenge"
 exec watchexec --watch . --exts rb -- ruby "$challenge"
