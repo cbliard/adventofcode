@@ -33,10 +33,6 @@ RSpec.describe "Day 7" do
   end
 end
 
-def dist(x1, x2)
-  (x1 - x2).abs
-end
-
 class Solver
   attr_reader :positions
 
@@ -52,7 +48,8 @@ class Solver
 
   def cost(pos)
     @costs[pos] ||= positions
-      .map { @expensive_fuel ? extra_fuel(dist(pos, _1)) : dist(pos, _1) }
+      .map { (pos - _1).abs }
+      .map { @expensive_fuel ? extra_fuel(_1) : _1 }
       .sum
   end
 
