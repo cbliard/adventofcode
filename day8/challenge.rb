@@ -85,15 +85,6 @@ def count_1478(s)
     .count
 end
 
-def find_1(patterns)
-  patterns.find { |p| p.length == 3 }
-end
-
-def find_7(patterns)
-  patterns.find{ |p| p.length == 2 }
-end
-
-
 def find_digits(input)
   patterns, digits = input.split(" | ")
   patterns = patterns.split.map { Set.new(_1.split("")) }
