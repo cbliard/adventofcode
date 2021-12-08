@@ -79,7 +79,6 @@ def run_challenge
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
-    puts
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
       Timeout::timeout(TIMEOUT_SECONDS) do
@@ -87,6 +86,7 @@ def run_challenge
       end
     end
     puts "took: #{"%0.2f" % (realtime * 1000)}ms"
+    puts
   end
 end
 
