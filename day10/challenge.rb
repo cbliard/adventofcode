@@ -7,7 +7,7 @@ PART_1_EXAMPLE_SOLUTION = 26397
 PART_2_EXAMPLE_SOLUTION = 288957
 TIMEOUT_SECONDS = 5
 
-SCORES = {
+CORRUPTED_SCORES = {
   ")" => 3,
   "]" => 57,
   "}" => 1197,
@@ -49,21 +49,13 @@ RSpec.describe "Day 10" do
   end
 
   describe 'analyze' do
-    it 'return :ok when valid' do
-      expect(analyze("")).to eq([:ok])
-      expect(analyze("()")).to eq([:ok])
-      expect(analyze("[]")).to eq([:ok])
-      expect(analyze("{}")).to eq([:ok])
-      expect(analyze("<>")).to eq([:ok])
-    end
-
     it 'return :corrupted when invalid' do
-      expect(analyze("(]")).to eq([:corrupted, "]"])
+      expect(analyze("(]")).to eq({corrupted: "]"})
     end
 
     it 'return :incomplete when invalid' do
-      expect(analyze("(")).to eq([:incomplete, %w")"])
-      expect(analyze("([{<")).to eq([:incomplete, %w"> } ] )"])
+      expect(analyze("(")).to eq({incomplete: %w")"})
+      expect(analyze("([{<")).to eq({incomplete: %w"> } ] )"})
     end
   end
 
@@ -82,12 +74,12 @@ RSpec.describe "Day 10" do
   end
 end
 
-def valid_pair?(pair)
-  PAIRS[pair.first] == pair.last
+def corrupted_score(char)
+  CORRUPTED_SCORES[char]
 end
 
-def corrupted_pair?(pair)
-  !valid_pair?(pair)
+def incomplete_score(chars)
+  chars.reduce(0) { |score, char| (score * 5) + INCOMPLETE_SCORES[char] }
 end
 
 def analyze(line)
@@ -97,32 +89,26 @@ def analyze(line)
     when "(", "{", "[", "<"
       stack.push(char)
     when ")", "}", "]", ">"
-      return [:corrupted, char] if char != PAIRS[stack.pop]
+      return {corrupted: char} if char != PAIRS[stack.pop]
     end
   end
 
-  if stack.any?
-    [:incomplete, PAIRS.values_at(*stack.reverse)]
-  else
-    [:ok]
-  end
+  {incomplete: PAIRS.values_at(*stack.reverse)}
 end
 
 def solve_part1(input = nil)
   with(input) do |io|
-    corrupted_chars = io.readlines
-      .map { analyze(_1) }
-      .filter_map { |result, char| char if result == :corrupted}
-    SCORES.values_at(*corrupted_chars).sum
+    io.readlines
+      .filter_map { analyze(_1)[:corrupted] }
+      .reduce(0) { |score, char| score + corrupted_score(char) }
   end
 end
 
 def solve_part2(input = nil)
   with(input) do |io|
     io.readlines
-      .map { analyze(_1) }
-      .filter_map { |result, chars| chars if result == :incomplete}
-      .map { |chars| chars.reduce(0) { |score, char| (score * 5) + INCOMPLETE_SCORES[char] }}
+      .filter_map { analyze(_1)[:incomplete] }
+      .map { incomplete_score(_1) }
       .sort
       .then { |scores| scores[scores.length / 2] }
   end
