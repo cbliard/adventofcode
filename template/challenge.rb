@@ -37,14 +37,12 @@ end
 def solve_part1(input = nil)
   with(input) do |io|
     io.readlines
-    "part 1 not implemented"
   end
 end
 
 def solve_part2(input = nil)
   with(input) do |io|
     io.readlines
-    "part 2 not implemented"
   end
 end
 
