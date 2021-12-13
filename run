@@ -4,9 +4,9 @@ set -e
 
 cd "$(cd "$(dirname $0)" && pwd)"
 
-day=$(date '+%-d')
+day=${1-$(date '+%-d')}
 dir="day${day}"
 challenge="$dir/challenge.rb"
 
-echo "-- Test & Run challenge"
+echo "-- Test & Run challenge day ${day}"
 exec watchexec --watch . --exts rb -- ruby "$challenge"
