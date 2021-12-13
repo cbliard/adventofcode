@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 require 'benchmark'
 require 'rspec'
+require 'set'
 require 'timeout'
 
 PART_1_EXAMPLE_SOLUTION = nil
 PART_2_EXAMPLE_SOLUTION = nil
-TIMEOUT_SECONDS = 5
+TIMEOUT_SECONDS = 30
 
 RSpec.describe "Day xxx" do
   let(:sample_input) do
@@ -56,14 +57,22 @@ def with(input)
   end
 end
 
+def timeout
+  if File.open(__FILE__) { _1.grep(/[b]inding.irb\b/) }
+    yield
+  else
+    Timeout::timeout(TIMEOUT_SECONDS) {
+      yield
+    }
+  end
+end
+
 def run_rspec
   RSpec.configure do |c|
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
-        example.run
-      }
+      timeout { example.run }
     end
   end
   rspec_result = RSpec::Core::Runner.run([])
@@ -79,7 +88,7 @@ def run_challenge
 
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS) do
+      timeout do
         puts "answer: #{send(solver)}"
       end
     end
