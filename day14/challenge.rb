@@ -5,7 +5,7 @@ require 'set'
 require 'timeout'
 
 PART_1_EXAMPLE_SOLUTION = 1588
-PART_2_EXAMPLE_SOLUTION = nil
+PART_2_EXAMPLE_SOLUTION = 2188189693529
 TIMEOUT_SECONDS = 30
 
 RSpec.describe "Day 14" do
@@ -59,7 +59,8 @@ class ExtendedPolymerization
   def rules
     @rules ||= @input
       .filter { _1.include?("->") }
-      .map { _1.strip.split(" -> ").then { |(k, v)| [k.split(""), v] } }
+      .map { _1.strip.split(" -> ") }
+      .map { |(pair, el)| [pair, ["#{pair[0]}#{el}", "#{el}#{pair[1]}"]] }
       .to_h
   end
 
@@ -68,28 +69,44 @@ class ExtendedPolymerization
   end
 
   def part1
-    polymer = generate(template, 10)
-    part1_result(polymer)
+    generate(initial_pairs_counts, 10)
   end
 
-  def part1_result(polymer)
-    most_common(polymer) - least_common(polymer)
+  def part2
+    generate(initial_pairs_counts, 40)
   end
 
-  def most_common(polymer)
-    polymer.tally.values.max
+  def initial_pairs_counts
+    template.each_cons(2).map(&:join).tally
   end
 
-  def least_common(polymer)
-    polymer.tally.values.min
+  def result(pairs_counts)
+    counts = element_counts(pairs_counts).values
+    counts.max - counts.min
   end
 
-  def generate(template, count)
-    return template if count == 0
+  def element_counts(pairs_counts)
+    counts = pairs_counts.reduce(Hash.new(0)) do |counts, (pair, count)|
+      counts[pair[0]] += count
+      counts
+    end
+    counts[template[-1]] += 1
+    counts
+  end
 
-    new_elements = rules.values_at(*template.each_cons(2))
-    new_template = template.zip(new_elements).flatten.compact
-    generate(new_template, count - 1)
+  def generate(pairs_counts, n)
+    return result(pairs_counts) if n == 0
+
+    generate(polymerize(pairs_counts), n - 1)
+  end
+
+  def polymerize(pairs_counts)
+    pairs_counts.reduce(Hash.new(0)) do |counts, (pair, count)|
+      p1, p2 = rules[pair]
+      counts[p1] += count
+      counts[p2] += count
+      counts
+    end
   end
 end
 
@@ -101,7 +118,7 @@ end
 
 def solve_part2(input = nil)
   with(input) do |io|
-    io.readlines
+    ExtendedPolymerization.new(io.readlines).part2
   end
 end
 
@@ -129,6 +146,7 @@ def run_rspec
   RSpec.configure do |c|
     c.fail_fast = true
     c.formatter = "documentation"
+    c.filter_run_when_matching :focus
     c.around(:each) do |example|
       timeout { example.run }
     end
