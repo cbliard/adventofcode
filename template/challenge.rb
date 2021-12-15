@@ -58,7 +58,7 @@ def with(input)
 end
 
 def timeout
-  if File.open(__FILE__) { _1.grep(/binding.irb\b/) }
+  if File.open(__FILE__) { _1.grep(/\sbinding.irb\b/) }
     yield
   else
     Timeout.timeout(TIMEOUT_SECONDS) {
