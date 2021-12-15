@@ -78,16 +78,9 @@ class Chiton
   def lowest_total_risk
     visited = {}
     reachable = {origin => 0}
-    c = 0
-    pp destination
-    output = lambda { |v| v == 97 }
     while reachable.any?
 
-      puts "-----------------" if output.call(c)
-      c += 1
-      pp visited if output.call(c)
       lowest_risk_position, total_risk = reachable.min_by { |_, level| level }
-      puts c if lowest_risk_position == destination
       return total_risk if lowest_risk_position == destination
 
       visited[lowest_risk_position] = total_risk
@@ -97,7 +90,6 @@ class Chiton
         .map { |position| [position, total_risk + risk(position)] }
         .to_h
         .merge(reachable) { |_, r1, r2| [r1, r2].min }
-      pp reachable if output.call(c)
     end
   end
 
