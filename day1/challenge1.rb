@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'rspec'
+require "rspec"
 
 RSpec.describe "count_sonar_depth_increases" do
   it "returns the number of times the depth increases" do
@@ -39,7 +39,6 @@ RSpec.describe "count_sonar_depth_sliding_increases" do
   end
 end
 
-
 def count_sonar_depth_increases(input = nil)
   with_input_data(input) do |data|
     read_measures(data)
@@ -65,13 +64,13 @@ end
 
 def count_increases(array)
   array.each_cons(2)
-    .map { |a, b| { -1 => "increased", 0 => "same", 1 => "decreased" }[a <=> b] }
+    .map { |a, b| {-1 => "increased", 0 => "same", 1 => "decreased"}[a <=> b] }
     .count("increased")
 end
 
 def with_input_data(source)
   if source.nil?
-    open(File.join(__dir__, "challenge1-input.txt")) { |measures| yield measures }
+    File.open(File.join(__dir__, "challenge1-input.txt")) { |measures| yield measures }
   else
     yield source
   end

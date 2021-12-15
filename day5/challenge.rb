@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'rspec'
+
+require "rspec"
 
 PART_1_EXAMPLE_SOLUTION = 5
 PART_2_EXAMPLE_SOLUTION = 12
@@ -7,16 +8,16 @@ PART_2_EXAMPLE_SOLUTION = 12
 RSpec.describe "Day 5" do
   let(:sample_input) do
     <<~INPUT
-    0,9 -> 5,9
-    8,0 -> 0,8
-    9,4 -> 3,4
-    2,2 -> 2,1
-    7,0 -> 7,4
-    6,4 -> 2,0
-    0,9 -> 2,9
-    3,4 -> 1,4
-    0,0 -> 8,8
-    5,5 -> 8,2
+      0,9 -> 5,9
+      8,0 -> 0,8
+      9,4 -> 3,4
+      2,2 -> 2,1
+      7,0 -> 7,4
+      6,4 -> 2,0
+      0,9 -> 2,9
+      3,4 -> 1,4
+      0,0 -> 8,8
+      5,5 -> 8,2
     INPUT
   end
 
@@ -24,28 +25,28 @@ RSpec.describe "Day 5" do
     expect(sample_input).not_to match(/copy_sample_input_here/)
   end
 
-  describe 'expand' do
-    it 'expands each horizontal segment into coordinates' do
+  describe "expand" do
+    it "expands each horizontal segment into coordinates" do
       expect(expand("0,9 -> 1,9")).to eq([[0, 9], [1, 9]])
       expect(expand("0,9 -> 2,9")).to eq([[0, 9], [1, 9], [2, 9]])
       expect(expand("0,9 -> 5,9")).to eq([[0, 9], [1, 9], [2, 9], [3, 9], [4, 9], [5, 9]])
     end
 
-    it 'expands each horizontal segment into coordinates backwards' do
+    it "expands each horizontal segment into coordinates backwards" do
       expect(expand("1,9 -> 0,9")).to eq([[1, 9], [0, 9]])
       expect(expand("2,9 -> 0,9")).to eq([[2, 9], [1, 9], [0, 9]])
       expect(expand("5,9 -> 0,9")).to eq([[5, 9], [4, 9], [3, 9], [2, 9], [1, 9], [0, 9]])
     end
 
-    it 'expands each vertical segment into coordinates' do
+    it "expands each vertical segment into coordinates" do
       expect(expand("0,0 -> 0,2")).to eq([[0, 0], [0, 1], [0, 2]])
     end
 
-    it 'expands each vertical segment into coordinates backwards' do
+    it "expands each vertical segment into coordinates backwards" do
       expect(expand("0,2 -> 0,0")).to eq([[0, 2], [0, 1], [0, 0]])
     end
 
-    it 'does not expand diagonally' do
+    it "does not expand diagonally" do
       expect(expand("0,2 -> 2,0")).to eq([])
       expect(expand("2,0 -> 0,2")).to eq([])
       expect(expand("0,0 -> 2,2")).to eq([])
@@ -53,8 +54,8 @@ RSpec.describe "Day 5" do
     end
   end
 
-  describe 'expand_with_diags' do
-    it 'expands diagonally in each direction' do
+  describe "expand_with_diags" do
+    it "expands diagonally in each direction" do
       expect(expand_with_diags("0,2 -> 2,0")).to eq([[0, 2], [1, 1], [2, 0]])
       expect(expand_with_diags("2,0 -> 0,2")).to eq([[2, 0], [1, 1], [0, 2]])
       expect(expand_with_diags("0,0 -> 2,2")).to eq([[0, 0], [1, 1], [2, 2]])
@@ -150,7 +151,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else

@@ -61,18 +61,18 @@ RSpec.describe "Day 4" do
     end
 
     describe "#winner?" do
-      it 'returns false if board does not win with drawn numbers' do
+      it "returns false if board does not win with drawn numbers" do
         expect(board.winner?([])).to be_falsy
         expect(board.winner?([])).to be_falsy
       end
 
-      it 'returns false if drawn numbers do not match a full board row or column' do
+      it "returns false if drawn numbers do not match a full board row or column" do
         expect(board.winner?([14, 21, 17, 24])).to be_falsy
         expect(board.winner?([1, 2, 3, 4])).to be_falsy
         expect(board.winner?([14, 21, 17, 24, 10, 16, 15, 7, 12, 3])).to be_falsy
       end
 
-      it 'returns true if drawn numbers match a board row' do
+      it "returns true if drawn numbers match a board row" do
         expect(board.winner?([14, 21, 17, 24, 4])).to be_truthy
         expect(board.winner?([10, 16, 15, 9, 19])).to be_truthy
         expect(board.winner?([18, 8, 23, 26, 20])).to be_truthy
@@ -80,7 +80,7 @@ RSpec.describe "Day 4" do
         expect(board.winner?([2, 0, 12, 3, 7])).to be_truthy
       end
 
-      it 'returns true if drawn numbers match a board column' do
+      it "returns true if drawn numbers match a board column" do
         expect(board.winner?([14, 10, 18, 22, 2])).to be_truthy
         expect(board.winner?([21, 16, 8, 11, 0])).to be_truthy
         expect(board.winner?([17, 15, 23, 13, 12])).to be_truthy
@@ -90,12 +90,11 @@ RSpec.describe "Day 4" do
     end
 
     describe "#score" do
-      it 'returns the sum of all unmarked board numbers multiplied by last drawn number' do
+      it "returns the sum of all unmarked board numbers multiplied by last drawn number" do
         drawn_numbers = [7, 4, 9, 5, 11, 17, 23, 2, 0, 14, 21, 24]
         expect(board.score(drawn_numbers)).to eq(4512)
       end
     end
-
   end
 
   describe "solve_part1" do
@@ -138,8 +137,8 @@ class Board
     Board.new(rows)
   end
 
-  def ==(o)
-    o.class == self.class && o.lines == lines
+  def ==(other)
+    other.class == self.class && other.lines == lines
   end
 end
 
@@ -151,9 +150,8 @@ def solve_part1(input = nil)
     drawn_numbers = []
     while all_drawn_numbers.any?
       drawn_numbers << all_drawn_numbers.shift
-      if winner = boards.find { |board| board.winner?(drawn_numbers) }
-        return winner.score(drawn_numbers)
-      end
+      winner = boards.find { |board| board.winner?(drawn_numbers) }
+      return winner.score(drawn_numbers) if winner
     end
     "not found"
   end

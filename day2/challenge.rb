@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'rspec'
+
+require "rspec"
 
 RSpec.describe "Day2" do
   let(:sample_input) do
@@ -26,7 +27,6 @@ RSpec.describe "Day2" do
   end
 end
 
-
 def solve_part1(input = nil)
   with(input) do |io|
     commands =
@@ -49,7 +49,7 @@ end
 
 def forward(command, amount, aim)
   case command
-  when "forward" then { x: amount, depth: aim*amount }
+  when "forward" then {x: amount, depth: aim * amount}
   else {}
   end
 end
@@ -75,7 +75,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else

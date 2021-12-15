@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 37
 PART_2_EXAMPLE_SOLUTION = 168
@@ -10,7 +11,7 @@ TIMEOUT_SECONDS = 5
 RSpec.describe "Day 7" do
   let(:sample_input) do
     <<~INPUT
-    16,1,2,0,4,2,7,1,2,14
+      16,1,2,0,4,2,7,1,2,14
     INPUT
   end
 
@@ -83,7 +84,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -96,7 +97,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
+      Timeout.timeout(TIMEOUT_SECONDS) {
         example.run
       }
     end
@@ -108,18 +109,18 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS * 1000) do
+      Timeout.timeout(TIMEOUT_SECONDS * 1000) do
         puts "answer: #{send(solver)}"
       end
     end
-    puts "took: #{"%0.2f" % (realtime)}ms"
+    puts "took: #{"%0.2f" % realtime}ms"
   end
 end
 

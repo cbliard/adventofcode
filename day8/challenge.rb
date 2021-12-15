@@ -1,8 +1,9 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'set'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "set"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 26
 PART_2_EXAMPLE_SOLUTION = 61229
@@ -29,16 +30,16 @@ TIMEOUT_SECONDS = 5
 RSpec.describe "Day 8" do
   let(:sample_input) do
     <<~INPUT
-    be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
-    edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
-    fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
-    fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
-    aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
-    fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
-    dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
-    bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
-    egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
-    gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
+      be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
+      edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
+      fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
+      fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
+      aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga | gecf egdcabf bgf bfgea
+      fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf | gebdcfa ecba ca fadegcb
+      dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf | cefg dcbef fcge gbcadfe
+      bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd | ed bcgafe cdgba cbgef
+      egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
+      gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     INPUT
   end
 
@@ -46,8 +47,8 @@ RSpec.describe "Day 8" do
     expect(sample_input).not_to match(/copy_sample_input_here/)
   end
 
-  describe 'count_1478' do
-    it 'counts the number of times 1, 4, 7, or 8 appear in the four digits output value' do
+  describe "count_1478" do
+    it "counts the number of times 1, 4, 7, or 8 appear in the four digits output value" do
       expect(count_1478("gcbe")).to eq(1)
       expect(count_1478("cgb")).to eq(1)
       expect(count_1478("cg cg")).to eq(2)
@@ -56,8 +57,8 @@ RSpec.describe "Day 8" do
     end
   end
 
-  describe 'find_digits' do
-    it 'find digits from input' do
+  describe "find_digits" do
+    it "find digits from input" do
       input = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
       expect(find_digits(input)).to eq("5353")
     end
@@ -87,8 +88,8 @@ end
 
 def find_digits(input)
   patterns, digits = input.split(" | ")
-  patterns = patterns.split.map { Set.new(_1.split("")) }
-  digits = digits.split.map { Set.new(_1.split("")) }
+  patterns = patterns.split.map { Set.new(_1chars) }
+  digits = digits.split.map { Set.new(_1chars) }
 
   mapping = {}
 
@@ -113,7 +114,7 @@ end
 def solve_part1(input = nil)
   with(input) do |io|
     io.readlines
-      .map { |l| l.split(" | ").last}
+      .map { |l| l.split(" | ").last }
       .map { |s| count_1478(s) }
       .sum
   end
@@ -129,7 +130,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -142,7 +143,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
+      Timeout.timeout(TIMEOUT_SECONDS) {
         example.run
       }
     end
@@ -154,13 +155,13 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS) do
+      Timeout.timeout(TIMEOUT_SECONDS) do
         puts "answer: #{send(solver)}"
       end
     end

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 26397
 PART_2_EXAMPLE_SOLUTION = 288957
@@ -11,21 +12,21 @@ CORRUPTED_SCORES = {
   ")" => 3,
   "]" => 57,
   "}" => 1197,
-  ">" => 25137,
+  ">" => 25137
 }
 
 INCOMPLETE_SCORES = {
   ")" => 1,
   "]" => 2,
   "}" => 3,
-  ">" => 4,
+  ">" => 4
 }
 
 PAIRS = {
   "(" => ")",
   "[" => "]",
   "{" => "}",
-  "<" => ">",
+  "<" => ">"
 }
 
 RSpec.describe "Day 10" do
@@ -48,13 +49,13 @@ RSpec.describe "Day 10" do
     expect(sample_input).not_to match(/copy_sample_input_here/)
   end
 
-  describe 'analyze' do
-    it 'return :corrupted when invalid' do
+  describe "analyze" do
+    it "return :corrupted when invalid" do
       expect(analyze("(]")).to eq({corrupted: "]"})
     end
 
-    it 'return :incomplete when invalid' do
-      expect(analyze("(")).to eq({incomplete: %w")"})
+    it "return :incomplete when invalid" do
+      expect(analyze("(")).to eq({incomplete: %w[)]})
       expect(analyze("([{<")).to eq({incomplete: %w"> } ] )"})
     end
   end
@@ -116,7 +117,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -129,7 +130,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
+      Timeout.timeout(TIMEOUT_SECONDS) {
         example.run
       }
     end
@@ -141,13 +142,13 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS) do
+      Timeout.timeout(TIMEOUT_SECONDS) do
         puts "answer: #{send(solver)}"
       end
     end

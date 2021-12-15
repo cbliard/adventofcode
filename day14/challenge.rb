@@ -1,8 +1,9 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'set'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "set"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 1588
 PART_2_EXAMPLE_SOLUTION = 2188189693529
@@ -65,7 +66,7 @@ class ExtendedPolymerization
   end
 
   def template
-    @template ||= @input.first.strip.split("")
+    @template ||= @input.first.stripchars
   end
 
   def part1
@@ -86,9 +87,8 @@ class ExtendedPolymerization
   end
 
   def element_counts(pairs_counts)
-    counts = pairs_counts.reduce(Hash.new(0)) do |counts, (pair, count)|
+    counts = pairs_counts.each_with_object(Hash.new(0)) do |(pair, count), counts|
       counts[pair[0]] += count
-      counts
     end
     counts[template[-1]] += 1
     counts
@@ -101,11 +101,10 @@ class ExtendedPolymerization
   end
 
   def polymerize(pairs_counts)
-    pairs_counts.reduce(Hash.new(0)) do |counts, (pair, count)|
+    pairs_counts.each_with_object(Hash.new(0)) do |(pair, count), counts|
       p1, p2 = rules[pair]
       counts[p1] += count
       counts[p2] += count
-      counts
     end
   end
 end
@@ -124,7 +123,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -133,10 +132,10 @@ def with(input)
 end
 
 def timeout
-  if File.open(__FILE__) { _1.grep(/[b]inding.irb\b/) }
+  if File.open(__FILE__) { _1.grep(/binding.irb\b/) }
     yield
   else
-    Timeout::timeout(TIMEOUT_SECONDS) {
+    Timeout.timeout(TIMEOUT_SECONDS) {
       yield
     }
   end
@@ -158,7 +157,7 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 

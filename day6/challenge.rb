@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 5934
 PART_2_EXAMPLE_SOLUTION = 26984457539
@@ -9,7 +10,7 @@ PART_2_EXAMPLE_SOLUTION = 26984457539
 RSpec.describe "Day 6" do
   let(:sample_input) do
     <<~INPUT
-    3,4,3,1,2
+      3,4,3,1,2
     INPUT
   end
 
@@ -17,52 +18,52 @@ RSpec.describe "Day 6" do
     expect(sample_input).not_to match(/copy_sample_input_here/)
   end
 
-  describe 'next_day' do
-    it 'subs 1 to each age' do
-      expect(next_day([1,2,3,4,5,6,7,8])).to eq([0,1,2,3,4,5,6,7])
+  describe "next_day" do
+    it "subs 1 to each age" do
+      expect(next_day([1, 2, 3, 4, 5, 6, 7, 8])).to eq([0, 1, 2, 3, 4, 5, 6, 7])
     end
 
-    context 'when age is 0' do
-      it 'reset age to 6 and add a new lanternfish of age 8' do
-        expect(next_day([0])).to eq([6,8])
+    context "when age is 0" do
+      it "reset age to 6 and add a new lanternfish of age 8" do
+        expect(next_day([0])).to eq([6, 8])
       end
 
-      it 'adds new lanternfishes at the end' do
+      it "adds new lanternfishes at the end" do
         expect(next_day([0, 0, 0])).to eq([6, 6, 6, 8, 8, 8])
       end
     end
   end
 
-  describe 'next_n_days' do
-    it 'runs next_day n times' do
-      expect(next_n_days(1, [1,2,3,4,5,6,7,8])).to eq([0,1,2,3,4,5,6,7])
-      expect(next_n_days(2, [1,2,3,4,5,6,7,8])).to eq([6,0,1,2,3,4,5,6,8])
-      expect(next_n_days(3, [1,2,3,4,5,6,7,8])).to eq([5,6,0,1,2,3,4,5,7,8])
+  describe "next_n_days" do
+    it "runs next_day n times" do
+      expect(next_n_days(1, [1, 2, 3, 4, 5, 6, 7, 8])).to eq([0, 1, 2, 3, 4, 5, 6, 7])
+      expect(next_n_days(2, [1, 2, 3, 4, 5, 6, 7, 8])).to eq([6, 0, 1, 2, 3, 4, 5, 6, 8])
+      expect(next_n_days(3, [1, 2, 3, 4, 5, 6, 7, 8])).to eq([5, 6, 0, 1, 2, 3, 4, 5, 7, 8])
     end
   end
 
-  describe 'to_population' do
-    it 'converts the ages vector into a population array' do
-      expect(to_population([0])).to eq([1,0,0,0,0,0,0,0,0])
-      expect(to_population([0,1,2,3,4,5,6,7,8])).to eq([1,1,1,1,1,1,1,1,1])
-      expect(to_population([1,1,1,3,3,3,8,7,8])).to eq([0,3,0,3,0,0,0,1,2])
+  describe "to_population" do
+    it "converts the ages vector into a population array" do
+      expect(to_population([0])).to eq([1, 0, 0, 0, 0, 0, 0, 0, 0])
+      expect(to_population([0, 1, 2, 3, 4, 5, 6, 7, 8])).to eq([1, 1, 1, 1, 1, 1, 1, 1, 1])
+      expect(to_population([1, 1, 1, 3, 3, 3, 8, 7, 8])).to eq([0, 3, 0, 3, 0, 0, 0, 1, 2])
     end
   end
 
-  describe 'next_population' do
-    it 'adds newborns to the population and resets the parents to 6th day' do
-      expect(next_population([0,1,0,0,0,0,0,0,0])).to eq([1,0,0,0,0,0,0,0,0])
-      expect(next_population([1,0,0,0,0,0,0,0,0])).to eq([0,0,0,0,0,0,1,0,1])
-      expect(next_population([4,5,6,7,8,9,1,2,3])).to eq([5,6,7,8,9,1,6,3,4])
+  describe "next_population" do
+    it "adds newborns to the population and resets the parents to 6th day" do
+      expect(next_population([0, 1, 0, 0, 0, 0, 0, 0, 0])).to eq([1, 0, 0, 0, 0, 0, 0, 0, 0])
+      expect(next_population([1, 0, 0, 0, 0, 0, 0, 0, 0])).to eq([0, 0, 0, 0, 0, 0, 1, 0, 1])
+      expect(next_population([4, 5, 6, 7, 8, 9, 1, 2, 3])).to eq([5, 6, 7, 8, 9, 1, 6, 3, 4])
     end
 
-    context 'when given days parameter' do
-      it 'runs it the given number of days' do
-        expect(next_population([0,0,0,0,1,0,0,0,0], 1)).to eq([0,0,0,1,0,0,0,0,0])
-        expect(next_population([0,0,0,0,1,0,0,0,0], 2)).to eq([0,0,1,0,0,0,0,0,0])
-        expect(next_population([0,0,0,0,1,0,0,0,0], 3)).to eq([0,1,0,0,0,0,0,0,0])
-        expect(next_population([0,0,0,0,1,0,0,0,0], 4)).to eq([1,0,0,0,0,0,0,0,0])
-        expect(next_population([0,0,0,0,1,0,0,0,0], 5)).to eq([0,0,0,0,0,0,1,0,1])
+    context "when given days parameter" do
+      it "runs it the given number of days" do
+        expect(next_population([0, 0, 0, 0, 1, 0, 0, 0, 0], 1)).to eq([0, 0, 0, 1, 0, 0, 0, 0, 0])
+        expect(next_population([0, 0, 0, 0, 1, 0, 0, 0, 0], 2)).to eq([0, 0, 1, 0, 0, 0, 0, 0, 0])
+        expect(next_population([0, 0, 0, 0, 1, 0, 0, 0, 0], 3)).to eq([0, 1, 0, 0, 0, 0, 0, 0, 0])
+        expect(next_population([0, 0, 0, 0, 1, 0, 0, 0, 0], 4)).to eq([1, 0, 0, 0, 0, 0, 0, 0, 0])
+        expect(next_population([0, 0, 0, 0, 1, 0, 0, 0, 0], 5)).to eq([0, 0, 0, 0, 0, 0, 1, 0, 1])
       end
     end
   end
@@ -128,7 +129,7 @@ end
 def next_n_days(n, ages)
   return ages if n <= 0
 
-  next_n_days(n-1, next_day(ages))
+  next_n_days(n - 1, next_day(ages))
 end
 
 def solve_part1(input = nil)
@@ -149,7 +150,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -162,7 +163,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(3) {
+      Timeout.timeout(3) {
         example.run
       }
     end
@@ -174,14 +175,14 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(3) do
+      Timeout.timeout(3) do
         puts "answer: #{send(solver)}"
       end
     end

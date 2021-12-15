@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 1656
 PART_2_EXAMPLE_SOLUTION = 195
@@ -47,7 +48,7 @@ class DumboOctopus
 
   def initialize(input)
     @levels ||= input
-      .map { _1.strip.split("").map(&:to_i) }
+      .map { _1.stripchars.map(&:to_i) }
     @generation = 0
   end
 
@@ -88,9 +89,9 @@ class DumboOctopus
 
   def neighbors(x, y)
     [
-      [x-1, y-1], [x, y-1], [x+1, y-1],
-      [x-1, y], [x+1, y],
-      [x-1, y+1], [x, y+1], [x+1, y+1],
+      [x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
+      [x - 1, y], [x + 1, y],
+      [x - 1, y + 1], [x, y + 1], [x + 1, y + 1]
     ].reject { |x, y| x < 0 || y < 0 || x > 9 || y > 9 }
   end
 
@@ -106,7 +107,6 @@ class DumboOctopus
     levels.reduce(0) { |count, row| count + row.count { _1 == 0} }
   end
 end
-
 
 def solve_part1(input = nil)
   with(input) do |io|
@@ -124,7 +124,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -137,7 +137,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
+      Timeout.timeout(TIMEOUT_SECONDS) {
         example.run
       }
     end
@@ -149,13 +149,13 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS) do
+      Timeout.timeout(TIMEOUT_SECONDS) do
         puts "answer: #{send(solver)}"
       end
     end

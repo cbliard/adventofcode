@@ -1,7 +1,8 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 17
 PART_2_EXAMPLE_SOLUTION = <<~SQUARE.strip
@@ -16,27 +17,27 @@ TIMEOUT_SECONDS = 5
 RSpec.describe "Day 13" do
   let(:sample_input) do
     <<~INPUT
-    6,10
-    0,14
-    9,10
-    0,3
-    10,4
-    4,11
-    6,0
-    6,12
-    4,1
-    0,13
-    10,12
-    3,4
-    3,0
-    8,4
-    1,10
-    2,14
-    8,10
-    9,0
+      6,10
+      0,14
+      9,10
+      0,3
+      10,4
+      4,11
+      6,0
+      6,12
+      4,1
+      0,13
+      10,12
+      3,4
+      3,0
+      8,4
+      1,10
+      2,14
+      8,10
+      9,0
 
-    fold along y=7
-    fold along x=5
+      fold along y=7
+      fold along x=5
     INPUT
   end
 
@@ -95,7 +96,7 @@ def solve_part1(input = nil)
     folds = folds
       .map { |fold| fold.split("=").then { |(direction, fold_coord)| [direction, fold_coord.to_i] } }
     points = points
-      .map { |s| s.split(",").map(&:to_i)}
+      .map { |s| s.split(",").map(&:to_i) }
 
     fold = folds.first
     points.map { fold(_1, fold) }
@@ -121,7 +122,7 @@ def solve_part2(input = nil)
     folds = folds
       .map { |fold| fold.split("=").then { |(direction, fold_coord)| [direction, fold_coord.to_i] } }
     points = points
-      .map { |s| s.split(",").map(&:to_i)}
+      .map { |s| s.split(",").map(&:to_i) }
 
     folded_points = folds.reduce(points) { |points, fold| points.map { fold(_1, fold) } }.uniq
     grid(folded_points)
@@ -130,7 +131,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -143,7 +144,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
+      Timeout.timeout(TIMEOUT_SECONDS) {
         example.run
       }
     end
@@ -155,13 +156,13 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS) do
+      Timeout.timeout(TIMEOUT_SECONDS) do
         puts "answer: \n#{send(solver)}"
       end
     end

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-require 'rspec'
+
+require "rspec"
 
 RSpec.describe "Day 3" do
   let(:sample_input) do
@@ -90,11 +91,10 @@ RSpec.describe "Day 3" do
   end
 end
 
-
 def solve_part1(input = nil)
   with(input) do |io|
     lines = io.readlines
-    bits_sum = lines.map { _1.strip.split("").map(&:to_i) }
+    bits_sum = lines.map { _1.stripchars.map(&:to_i) }
       .transpose
       .map(&:sum)
     gamma_bits = bits_sum.map { |sum| sum > lines.count / 2 ? 1 : 0 }
@@ -110,9 +110,9 @@ end
 def rating(numbers, &block)
   return "" if numbers.empty?
   return numbers.first if numbers.count == 1
-  return 'error' if numbers.first.empty?
+  return "error" if numbers.first.empty?
 
-  groups = { "0" => [], "1" => [] }
+  groups = {"0" => [], "1" => []}
   numbers.each do |number|
     head, tail = number.split("", 2)
     groups[head] << tail
@@ -146,7 +146,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else

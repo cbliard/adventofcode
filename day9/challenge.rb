@@ -1,8 +1,9 @@
 # frozen_string_literal: true
-require 'benchmark'
-require 'rspec'
-require 'set'
-require 'timeout'
+
+require "benchmark"
+require "rspec"
+require "set"
+require "timeout"
 
 PART_1_EXAMPLE_SOLUTION = 15
 PART_2_EXAMPLE_SOLUTION = 1134
@@ -11,11 +12,11 @@ TIMEOUT_SECONDS = 5
 RSpec.describe "Day 9" do
   let(:sample_input) do
     <<~INPUT
-    2199943210
-    3987894921
-    9856789892
-    8767896789
-    9899965678
+      2199943210
+      3987894921
+      9856789892
+      8767896789
+      9899965678
     INPUT
   end
 
@@ -30,21 +31,21 @@ RSpec.describe "Day 9" do
   end
 
   describe "merge_adjacent_regions" do
-    it 'connects the regions together' do
+    it "connects the regions together" do
       initial = [
         ["a", "a"],
-        ["b", 9],
+        ["b", 9]
       ]
       final = [
         ["a", "a"],
-        ["a", 9],
+        ["a", 9]
       ]
       expect(merge_adjacent_regions(initial)).to eq(final)
     end
   end
 
   describe "to_basins" do
-    it 'works if connected later' do
+    it "works if connected later" do
       grid = <<~INPUT
         2199943210
         3987894921
@@ -52,9 +53,9 @@ RSpec.describe "Day 9" do
         8767896798
         9899965678
       INPUT
-      grid = grid.split("\n").map { _1.strip.split("").map(&:to_i) }
+      grid = grid.split("\n").map { _1.stripchars.map(&:to_i) }
       result = to_basins(grid).map { |line| line.map(&:to_s).join }
-      .join("\n")
+        .join("\n")
       expected_result = <<~RESULT.strip
         aa999bbbbb
         a9ccc9b9bb
@@ -76,7 +77,7 @@ RSpec.describe "Day 9" do
 end
 
 def adjacents(grid, x, y)
-  [[x, y-1], [x-1, y], [x+1, y], [x, y+1]]
+  [[x, y - 1], [x - 1, y], [x + 1, y], [x, y + 1]]
     .map { |xx, yy|
       next if xx < 0 || y < 0
       grid.dig(xx, yy)
@@ -134,7 +135,7 @@ def to_basins(grid)
         marked = []
       else
         marked << [irow, icol]
-        basin ||= [map[irow][icol-1], map[irow-1][icol]].find { |x| basin?(x) }
+        basin ||= [map[irow][icol - 1], map[irow - 1][icol]].find { |x| basin?(x) }
       end
       icol += 1
     end
@@ -167,19 +168,17 @@ def merge_adjacent_regions(grid)
         .reject { _1.length <= 1 }
         .map { Set.new(_1) }
     end
-    .reduce([]) do |all_groups, group|
+    .each_with_object([]) do |group, all_groups|
       matching_group = all_groups.find { group.intersect?(_1) }
       if matching_group
         matching_group.merge(group)
       else
         all_groups << group
       end
-      all_groups
     end
-    .reduce({}) do |mapping, group|
+    .each_with_object({}) do |group, mapping|
       head, *tail = group.to_a.sort
       tail.each { mapping[_1] = head }
-      mapping
     end
   grid.map do |row|
     row.map { |x| mapping.fetch(x, x) }
@@ -188,7 +187,7 @@ end
 
 def solve_part1(input = nil)
   with(input) do |io|
-    grid = io.readlines.map { _1.strip.split("").map(&:to_i) }
+    grid = io.readlines.map { _1.stripchars.map(&:to_i) }
     lowpoints(grid)
       .map { |v| v + 1 }
       .sum
@@ -197,8 +196,7 @@ end
 
 def solve_part2(input = nil)
   with(input) do |io|
-    grid = io.readlines.map { _1.strip.split("").map(&:to_i) }
-    m = to_basins(grid)
+    grid = io.readlines.map { _1.stripchars.map(&:to_i) }
     (a, b, c) = to_basins(grid)
       .flatten
       .reject { |h| h == 9 }
@@ -212,7 +210,7 @@ end
 
 def with(input)
   if input.nil?
-    open(File.join(__dir__, "input.txt")) { |io| yield io }
+    File.open(File.join(__dir__, "input.txt")) { |io| yield io }
   elsif input.is_a?(String)
     yield StringIO.new(input)
   else
@@ -230,7 +228,7 @@ def run_rspec
     c.fail_fast = true
     c.formatter = "documentation"
     c.around(:each) do |example|
-      Timeout::timeout(TIMEOUT_SECONDS) {
+      Timeout.timeout(TIMEOUT_SECONDS) {
         example.run
       }
     end
@@ -242,13 +240,13 @@ end
 def run_challenge
   [
     [1, PART_1_EXAMPLE_SOLUTION, :solve_part1],
-    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2],
+    [2, PART_2_EXAMPLE_SOLUTION, :solve_part2]
   ].each do |part, part_implemented, solver|
     next unless part_implemented
 
     puts "==== PART #{part} ===="
     realtime = Benchmark.realtime do
-      Timeout::timeout(TIMEOUT_SECONDS) do
+      Timeout.timeout(TIMEOUT_SECONDS) do
         puts "answer: #{send(solver)}"
       end
     end
