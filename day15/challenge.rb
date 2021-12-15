@@ -76,20 +76,19 @@ class Chiton
   end
 
   def lowest_total_risk
-    visited = {}
-    reachable = {origin => 0}
+    reachable = [[origin, 0]]
+    visited = Set.new(reachable)
     while reachable.any?
-
-      lowest_risk_position, total_risk = reachable.min_by { |_, level| level }
+      lowest_risk_position, total_risk = reachable.shift
       return total_risk if lowest_risk_position == destination
 
-      visited[lowest_risk_position] = total_risk
-      reachable.delete(lowest_risk_position)
-      reachable = neighbors(lowest_risk_position)
-        .reject { |position| visited.key?(position) }
-        .map { |position| [position, total_risk + risk(position)] }
-        .to_h
-        .merge(reachable) { |_, r1, r2| [r1, r2].min }
+      neighbors(lowest_risk_position)
+        .reject { |position| visited.include?(position) }
+        .each do |position|
+          visited << position
+          reachable << [position, total_risk + risk(position)]
+        end
+      reachable.sort_by! { |_pos, total_risk| total_risk }
     end
   end
 
@@ -124,16 +123,6 @@ class Chiton
   def stretch
     extended ? 5 : 1
   end
-
-  def cavern_risk
-    return @cavern if @cavern
-
-    @cavern = []
-    indices.map do |position|
-      cavern[position] = @input
-    end
-    @input
-  end
 end
 
 def solve_part1(input = nil)
@@ -159,7 +148,7 @@ def with(input)
 end
 
 def timeout
-  if File.open(__FILE__) { _1.grep(/binding.irb\b/) }
+  if File.open(__FILE__) { _1.grep(/\sbinding.irb\b/) }
     yield
   else
     Timeout.timeout(TIMEOUT_SECONDS) {
