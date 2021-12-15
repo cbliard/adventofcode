@@ -4,6 +4,13 @@ require "benchmark"
 require "rspec"
 require "set"
 require "timeout"
+begin
+  require "fc"
+rescue LoadError => e
+  puts e
+  puts "run 'gem install priority_queue_cxx' to fix"
+  exit 1
+end
 
 PART_1_EXAMPLE_SOLUTION = 40
 PART_2_EXAMPLE_SOLUTION = 315
@@ -76,19 +83,18 @@ class Chiton
   end
 
   def lowest_total_risk
-    reachable = [[origin, 0]]
-    visited = Set.new(reachable)
-    while reachable.any?
-      lowest_risk_position, total_risk = reachable.shift
-      return total_risk if lowest_risk_position == destination
+    reachable = FastContainers::PriorityQueue.new(:min)
+    reachable.push(origin, 0)
+    visited = Set.new
+    reachable.pop_each do |lowest_risk_position, total_risk|
+      return total_risk.to_i if lowest_risk_position == destination
 
       neighbors(lowest_risk_position)
         .reject { |position| visited.include?(position) }
         .each do |position|
           visited << position
-          reachable << [position, total_risk + risk(position)]
+          reachable.push(position, total_risk + risk(position))
         end
-      reachable.sort_by! { |_pos, total_risk| total_risk }
     end
   end
 
