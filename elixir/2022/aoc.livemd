@@ -1,0 +1,198 @@
+# Advent of Code - Base
+
+```elixir
+Mix.install([
+  {:httpoison, "~> 1.8", env: :dev},
+  {:floki, "~> 0.34.0"}
+])
+```
+
+```elixir
+defmodule Aoc do
+  def dirname do
+    Path.dirname(__ENV__.file)
+  end
+
+  def path(filename) do
+    Path.join(dirname(), filename)
+  end
+
+  def fetch_day_html(year, day) do
+    "https://adventofcode.com/#{year}/day/#{day}"
+    |> IO.inspect(label: "url")
+    |> download(url)
+  end
+
+  def fetch_and_save_day_input(year, day) do
+    save_path =
+      day
+      |> Integer.to_string()
+      |> String.pad_leading(2, "0")
+      |> then(&path("day#{&1}.txt"))
+      |> IO.inspect(label: "day input path")
+
+    "https://adventofcode.com/#{year}/day/#{day}/input"
+    |> IO.inspect(label: "url")
+    |> download()
+    |> File.write!(save_path)
+  end
+
+  def session_cookie_header do
+    {"Cookie", "session=#{System.fetch_env!("LB_AOC_SESSION")}"}
+  end
+
+  def download(url) do
+    with %HTTPoison.Response{body: body} <- HTTPoison.get!(url, [session_cookie_header()]) do
+      body
+    end
+  end
+end
+```
+
+```elixir
+defmodule Puzzle do
+  def part(html, part_number) do
+    with {:ok, document} <- Floki.parse_document(html),
+      part <- find_part(document, part_number)
+    do
+      to_markdown(part)
+    end
+  end
+
+  def find_part(document, part_number) when part in [1, 2] do
+    document
+    |> Floki.find("article.day-desc")
+    |> Enum.at(part_number - 1)
+  end
+
+  def to_markdown(node) do
+    node
+    |> Floki.children()
+    |> Enum.map(fn e -> Puzzle.parse(e) end)
+    |> Enum.join("\n\n")
+  end
+
+  def parse(children) when is_list(children) do
+    children
+    |> Enum.map(&parse(&1))
+    |> Enum.join()
+  end
+
+  def parse({"h2", _, children}) do
+    Floki.text(children)
+    |> String.trim("-")
+    |> String.trim()
+    |> then(&"## #{&1}")
+  end
+
+  def parse({"p", _, children}) do
+    parse(children)
+  end
+
+  def parse({"em", _, children}) do
+    "**#{parse(children)}**"
+  end
+
+  def parse({"code", _, children}) do
+    "`#{parse(children)}`"
+  end
+
+  def parse({"pre", _, children}) do
+    "```\n#{Floki.text(children)}```"
+  end
+
+  def parse({"ul", _, children}) do
+    "#{parse(children) |> String.trim()}"
+  end
+
+  def parse({"li", _, children}) do
+    "* #{parse(children)}\n"
+  end
+
+  def parse(s) when is_binary(s), do: s
+
+  def parse({tag, _, _}) do
+    "not handling #{tag}"
+  end
+end
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+````elixir
+ExUnit.start(autorun: false)
+
+defmodule PuzzleTest do
+  use ExUnit.Case, async: true
+
+  test "parsed header has dash decorations removed" do
+    assert Puzzle.parse({"h2", [], ["--- Header ---"]}) == "## Header"
+  end
+
+  test "parse simple paragraphs" do
+    assert Puzzle.parse({"p", [], ["Some text"]}) == "Some text"
+  end
+
+  test "parse paragraph with emphasized text" do
+    node =
+      {"p", [],
+       [
+         "Hello ",
+         {"em", [], ["world"]},
+         "!"
+       ]}
+
+    assert Puzzle.parse(node) == "Hello **world**!"
+  end
+
+  test "parse paragraph with code" do
+    node =
+      {"p", [],
+       [
+         "Hello ",
+         {"code", [], ["world"]},
+         "!"
+       ]}
+
+    assert Puzzle.parse(node) == "Hello `world`!"
+  end
+
+  test "parse paragraph with pre" do
+    node =
+      {"pre", [],
+       [
+         {"code", [], ["1721\n979\n366\n299\n675\n1456\n"]}
+       ]}
+
+    assert Puzzle.parse(node) == "```\n1721\n979\n366\n299\n675\n1456\n```"
+  end
+
+  test "parse list" do
+    node =
+      {"ul", [],
+       [
+         {"li", [], ["item 1"]},
+         {"li", [], ["item 2"]},
+         {"li", [], ["item 3"]}
+       ]}
+
+    assert Puzzle.parse(node) == "* item 1\n* item 2\n* item 3"
+  end
+end
+
+ExUnit.run()
+````
+
+````elixir
+day = 1
+Aoc.fetch_and_save_day_input(2022, day)
+Aoc.fetch_day_html(2022, day)
+|> Puzzle.part(1)
+|> IO.puts()
+````
+
+````elixir
+Aoc.fetch_day_html(2022, day)
+|> Puzzle.part(2)
+|> IO.puts()
+````
