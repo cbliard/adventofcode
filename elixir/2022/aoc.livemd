@@ -7,6 +7,8 @@ Mix.install([
 ])
 ```
 
+## Helper Module
+
 ```elixir
 defmodule Aoc do
   def dirname do
@@ -19,8 +21,7 @@ defmodule Aoc do
 
   def fetch_day_html(year, day) do
     "https://adventofcode.com/#{year}/day/#{day}"
-    |> IO.inspect(label: "url")
-    |> download(url)
+    |> download()
   end
 
   def fetch_and_save_day_input(year, day) do
@@ -29,12 +30,10 @@ defmodule Aoc do
       |> Integer.to_string()
       |> String.pad_leading(2, "0")
       |> then(&path("day#{&1}.txt"))
-      |> IO.inspect(label: "day input path")
 
     "https://adventofcode.com/#{year}/day/#{day}/input"
-    |> IO.inspect(label: "url")
     |> download()
-    |> File.write!(save_path)
+    |> then(&File.write!(save_path, &1))
   end
 
   def session_cookie_header do
@@ -49,17 +48,16 @@ defmodule Aoc do
 end
 ```
 
-```elixir
+````elixir
 defmodule Puzzle do
   def part(html, part_number) do
     with {:ok, document} <- Floki.parse_document(html),
-      part <- find_part(document, part_number)
-    do
+         part <- find_part(document, part_number) do
       to_markdown(part)
     end
   end
 
-  def find_part(document, part_number) when part in [1, 2] do
+  def find_part(document, part_number) when part_number in [1, 2] do
     document
     |> Floki.find("article.day-desc")
     |> Enum.at(part_number - 1)
@@ -115,7 +113,7 @@ defmodule Puzzle do
     "not handling #{tag}"
   end
 end
-```
+````
 
 <!-- livebook:{"reevaluate_automatically":true} -->
 
@@ -183,16 +181,17 @@ end
 ExUnit.run()
 ````
 
-````elixir
-day = 1
+```elixir
+day = 2
 Aoc.fetch_and_save_day_input(2022, day)
+
 Aoc.fetch_day_html(2022, day)
 |> Puzzle.part(1)
 |> IO.puts()
-````
+```
 
-````elixir
+```elixir
 Aoc.fetch_day_html(2022, day)
 |> Puzzle.part(2)
 |> IO.puts()
-````
+```
