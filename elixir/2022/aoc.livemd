@@ -48,6 +48,8 @@ defmodule Aoc do
 end
 ```
 
+<!-- livebook:{"reevaluate_automatically":true} -->
+
 ````elixir
 defmodule Puzzle do
   def part(html, part_number) do
@@ -87,8 +89,16 @@ defmodule Puzzle do
     parse(children)
   end
 
+  def parse({"a", attributes, children}) do
+    "[#{Floki.text(children)}](#{attribute(attributes, "href")})"
+  end
+
   def parse({"em", _, children}) do
     "**#{parse(children)}**"
+  end
+
+  def parse({"span", attributes, children}) do
+    "#{parse(children)} (_#{attribute(attributes, "title")}_)"
   end
 
   def parse({"code", _, children}) do
@@ -112,6 +122,10 @@ defmodule Puzzle do
   def parse({tag, _, _}) do
     "not handling #{tag}"
   end
+
+  def attribute([{key, value} | _], key), do: value
+  def attribute([_ | rest], key), do: attribute(rest, key)
+  def attribute([], _key), do: nil
 end
 ````
 
@@ -131,6 +145,14 @@ defmodule PuzzleTest do
     assert Puzzle.parse({"p", [], ["Some text"]}) == "Some text"
   end
 
+  test "parse link" do
+    node =
+      {"a", [{"href", "https://en.wikipedia.org/wiki/Rucksack"}, {"target", "_blank"}],
+       ["rucksacks"]}
+
+    assert Puzzle.parse(node) == "[rucksacks](https://en.wikipedia.org/wiki/Rucksack)"
+  end
+
   test "parse paragraph with emphasized text" do
     node =
       {"p", [],
@@ -141,6 +163,18 @@ defmodule PuzzleTest do
        ]}
 
     assert Puzzle.parse(node) == "Hello **world**!"
+  end
+
+  test "parse paragraph with span with title" do
+    node =
+      {"p", [],
+       [
+         "Hello ",
+         {"span", [{"title", "Where there's jungle, there's hijinxs."}], ["jungle"]},
+         "!"
+       ]}
+
+    assert Puzzle.parse(node) == "Hello jungle (_Where there's jungle, there's hijinxs._)!"
   end
 
   test "parse paragraph with code" do
@@ -182,7 +216,7 @@ ExUnit.run()
 ````
 
 ```elixir
-day = 2
+day = 3
 Aoc.fetch_and_save_day_input(2022, day)
 
 Aoc.fetch_day_html(2022, day)
