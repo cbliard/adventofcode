@@ -90,7 +90,7 @@ defmodule Puzzle do
   end
 
   def parse({"a", attributes, children}) do
-    "[#{Floki.text(children)}](#{attribute(attributes, "href")})"
+    " [#{Floki.text(children)}](#{attribute(attributes, "href") |> absolute_link()})"
   end
 
   def parse({"em", _, children}) do
@@ -101,12 +101,16 @@ defmodule Puzzle do
     "#{parse(children)} (_#{attribute(attributes, "title")}_)"
   end
 
+  def parse({"code", _, [{"em", _, [children]}]}) do
+    "**`#{parse(children)}`**"
+  end
+
   def parse({"code", _, children}) do
     "`#{parse(children)}`"
   end
 
   def parse({"pre", _, children}) do
-    "```\n#{Floki.text(children)}```"
+    "```\n#{Floki.text(children) |> String.trim_trailing("\n")}\n```"
   end
 
   def parse({"ul", _, children}) do
@@ -120,12 +124,15 @@ defmodule Puzzle do
   def parse(s) when is_binary(s), do: s
 
   def parse({tag, _, _}) do
-    "not handling #{tag}"
+    "**ERROR: not handling #{tag}**"
   end
 
-  def attribute([{key, value} | _], key), do: value
-  def attribute([_ | rest], key), do: attribute(rest, key)
-  def attribute([], _key), do: nil
+  defp attribute([{key, value} | _], key), do: value
+  defp attribute([_ | rest], key), do: attribute(rest, key)
+  defp attribute([], _key), do: nil
+
+  defp absolute_link(href = "/" <> _), do: "https://adventofcode.com#{href}"
+  defp absolute_link(href), do: href
 end
 ````
 
@@ -150,7 +157,12 @@ defmodule PuzzleTest do
       {"a", [{"href", "https://en.wikipedia.org/wiki/Rucksack"}, {"target", "_blank"}],
        ["rucksacks"]}
 
-    assert Puzzle.parse(node) == "[rucksacks](https://en.wikipedia.org/wiki/Rucksack)"
+    assert Puzzle.parse(node) == " [rucksacks](https://en.wikipedia.org/wiki/Rucksack)"
+  end
+
+  test "parse relative link" do
+    node = {"a", [{"href", "/2016/day/25"}, {"target", "_blank"}], ["experience"]}
+    assert Puzzle.parse(node) == " [experience](https://adventofcode.com/2016/day/25)"
   end
 
   test "parse paragraph with emphasized text" do
@@ -189,6 +201,18 @@ defmodule PuzzleTest do
     assert Puzzle.parse(node) == "Hello `world`!"
   end
 
+  test "parse paragraph with emphasized code" do
+    node =
+      {"p", [],
+       [
+         "Hello ",
+         {"code", [], [{"em", [], ["world"]}]},
+         "!"
+       ]}
+
+    assert Puzzle.parse(node) == "Hello **`world`**!"
+  end
+
   test "parse paragraph with pre" do
     node =
       {"pre", [],
@@ -197,6 +221,16 @@ defmodule PuzzleTest do
        ]}
 
     assert Puzzle.parse(node) == "```\n1721\n979\n366\n299\n675\n1456\n```"
+  end
+
+  test "parse paragraph with pre without final newline" do
+    node =
+      {"pre", [],
+       [
+         {"code", [], ["mjqjpqmgbljsphdztnvjfqwrcgsmlb"]}
+       ]}
+
+    assert Puzzle.parse(node) == "```\nmjqjpqmgbljsphdztnvjfqwrcgsmlb\n```"
   end
 
   test "parse list" do
@@ -216,7 +250,7 @@ ExUnit.run()
 ````
 
 ```elixir
-day = 5
+day = 6
 Aoc.fetch_and_save_day_input(2022, day)
 
 Aoc.fetch_day_html(2022, day)
