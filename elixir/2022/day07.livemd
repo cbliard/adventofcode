@@ -167,12 +167,9 @@ fs =
   Aoc.input()
   # example_input
   |> String.split("\n", trim: true)
-  |> Enum.reduce(%{}, fn
+  |> Enum.reduce(%{cwd: [], dirs: [%{path: "/"}], files: []}, fn
     "$ ls", fs ->
       fs
-
-    "$ cd /", _ ->
-      %{cwd: ["/"], dirs: [%{name: "/", path: "/"}], files: []}
 
     "$ cd ..", fs ->
       %{fs | cwd: tl(fs.cwd)}
@@ -182,12 +179,13 @@ fs =
 
     "dir " <> name, fs ->
       path = [name | fs.cwd] |> Enum.reverse() |> Enum.join("-")
-      %{fs | dirs: [%{name: name, path: path} | fs.dirs]}
+      %{fs | dirs: [%{path: path} | fs.dirs]}
 
     file_with_size, fs ->
       [size, name] = String.split(file_with_size, " ")
-      path = fs.cwd |> Enum.reverse() |> Enum.join("-")
-      %{fs | files: [%{name: name, path: path, size: size} | fs.files]}
+      path = [name | fs.cwd] |> Enum.reverse() |> Enum.join("-")
+      size = String.to_integer(size)
+      %{fs | files: [%{path: path, size: size} | fs.files]}
   end)
 
 sizes =
@@ -197,7 +195,7 @@ sizes =
     |> Enum.filter(fn
       %{path: path} -> String.starts_with?(path, dir_path)
     end)
-    |> Enum.map(fn %{size: size} -> String.to_integer(size) end)
+    |> Enum.map(fn %{size: size} -> size end)
     |> Enum.sum()
   end)
 
@@ -217,22 +215,4 @@ sizes
 |> Enum.filter(fn size -> size >= needed_unused_size end)
 |> Enum.min()
 |> IO.inspect(label: "answer part 2")
-
-# input =
-#   Aoc.input()
-#   |> String.graphemes()
-#   |> Enum.chunk_every(4, 1)
-#   |> Enum.with_index()
-#   |> Enum.find(fn {chunk, _index} -> Enum.uniq(chunk) == chunk end)
-#   |> then(fn {_chunk, index} -> index + 4 end)
-#   |> IO.inspect(label: "part 1")
-# 
-# input =
-#   Aoc.input()
-#   |> String.graphemes()
-#   |> Enum.chunk_every(14, 1)
-#   |> Enum.with_index()
-#   |> Enum.find(fn {chunk, _index} -> Enum.uniq(chunk) == chunk end)
-#   |> then(fn {_chunk, index} -> index + 14 end)
-#   |> IO.inspect(label: "part 2")
 ```
