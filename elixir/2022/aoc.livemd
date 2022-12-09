@@ -250,7 +250,7 @@ ExUnit.run()
 ````
 
 ```elixir
-day = 7
+day = 9
 Aoc.fetch_and_save_day_input(2022, day)
 
 Aoc.fetch_day_html(2022, day)
