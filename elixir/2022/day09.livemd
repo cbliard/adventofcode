@@ -310,39 +310,25 @@ example_solution_part2 = :tbd
 ```elixir
 state = %{
   head: {0, 0},
-  tail: {0, 0},
+  knots: for(_ <- 1..9, do: {0, 0}),
   visited: MapSet.new([{0, 0}])
 }
 
 defmodule C do
-  def move_head(state = %{head: {hx, hy}}, "U") do
-    %{state | head: {hx, hy - 1}}
+  def move_knot({hx, hy}, "U"), do: {hx, hy - 1}
+  def move_knot({hx, hy}, "D"), do: {hx, hy + 1}
+  def move_knot({hx, hy}, "L"), do: {hx - 1, hy}
+  def move_knot({hx, hy}, "R"), do: {hx + 1, hy}
+
+  def pull_knot(head = {hx, hy}, tail = {tx, ty}) do
+    if pulled?(head, tail) do
+      {tx + dir(tx, hx), ty + dir(ty, hy)}
+    else
+      tail
+    end
   end
 
-  def move_head(state = %{head: {hx, hy}}, "D") do
-    %{state | head: {hx, hy + 1}}
-  end
-
-  def move_head(state = %{head: {hx, hy}}, "L") do
-    %{state | head: {hx - 1, hy}}
-  end
-
-  def move_head(state = %{head: {hx, hy}}, "R") do
-    %{state | head: {hx + 1, hy}}
-  end
-
-  def pull_tail(state = %{head: {hx, hy}, tail: {tx, ty}}) do
-    tail =
-      cond do
-        pulled?(state.head, state.tail) -> {tx + dir(tx, hx), ty + dir(ty, hy)}
-        true -> state.tail
-      end
-
-    visited = state.visited |> MapSet.put(tail)
-    %{state | tail: tail, visited: visited}
-  end
-
-  def pulled?(head = {hx, hy}, tail = {tx, ty}) do
+  def pulled?({hx, hy}, {tx, ty}) do
     abs(hx - tx) > 1 or abs(hy - ty) > 1
   end
 
@@ -353,9 +339,22 @@ defmodule C do
   def move(state, [_, 0]), do: state
 
   def move(state, [dir, n]) do
-    state
-    |> move_head(dir)
-    |> pull_tail()
+    head =
+      state.head
+      |> move_knot(dir)
+
+    {pulled_knots, tail} =
+      state.knots
+      |> Enum.reduce({[], head}, fn
+        knot, {pulled_knots, head} ->
+          pulled_knot = pull_knot(head, knot)
+          {[pulled_knot | pulled_knots], pulled_knot}
+      end)
+
+    knots = pulled_knots |> Enum.reverse()
+    visited = state.visited |> MapSet.put(tail)
+
+    %{state | head: head, knots: knots, visited: visited}
     |> move([dir, n - 1])
   end
 end
@@ -375,6 +374,8 @@ end)
 ```
 
 ```elixir
+# playground
+
 for n <- 1..10, do: 3
 
 cond do
