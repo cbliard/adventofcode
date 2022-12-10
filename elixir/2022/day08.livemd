@@ -63,7 +63,47 @@ Consider your map; **how many trees are visible from outside the grid?**
 
 ## Part 2
 
-tbd
+Content with the amount of tree cover available, the Elves just need to know the best spot to build their tree house: they would like to be able to see a lot of **trees**.
+
+To measure the viewing distance from a given tree, look up, down, left, and right from that tree; stop if you reach an edge or at the first tree that is the same height or taller than the tree under consideration. (If a tree is right on the edge, at least one of its viewing distances will be zero.)
+
+The Elves don't care about distant trees taller than those found by the rules above; the proposed tree house has large  [eaves](https://en.wikipedia.org/wiki/Eaves) to keep it dry, so they wouldn't be able to see higher than the tree house anyway.
+
+In the example above, consider the middle `5` in the second row:
+
+```
+30373
+25512
+65332
+33549
+35390
+```
+
+* Looking up, its view is not blocked; it can see **`1`** tree (of height `3`).
+* Looking left, its view is blocked immediately; it can see only **`1`** tree (of height `5`, right next to it).
+* Looking right, its view is not blocked; it can see **`2`** trees.
+* Looking down, its view is blocked eventually; it can see **`2`** trees (one of height `3`, then the tree of height `5` that blocks its view).
+
+A tree's **scenic score** is found by **multiplying together** its viewing distance in each of the four directions. For this tree, this is **`4`** (found by multiplying `1 * 1 * 2 * 2`).
+
+However, you can do even better: consider the tree of height `5` in the middle of the fourth row:
+
+```
+30373
+25512
+65332
+33549
+35390
+```
+
+* Looking up, its view is blocked at **`2`** trees (by another tree with a height of `5`).
+* Looking left, its view is not blocked; it can see **`2`** trees.
+* Looking down, its view is also not blocked; it can see **`1`** tree.
+* Looking right, its view is blocked at **`2`** trees (by a massive tree of height `9`).
+
+This tree's scenic score is **`8`** (`2 * 2 * 1 * 2`); this is the ideal spot for the tree house.
+
+Consider each tree on your map. **What is the highest scenic score possible for any tree?**
 
 ```elixir
 example_input = """
@@ -75,229 +115,23 @@ example_input = """
 """
 
 example_solution_part1 = 21
-example_solution_part2 = :tbd
+example_solution_part2 = 8
 ```
 
 ```elixir
 defmodule C do
-  def edge_visible(trees) do
-    size = length(trees)
-    line = [1] ++ for(_ <- 1..(size - 2), do: 0) ++ [1]
-    edge = for _ <- 1..size, do: 1
-    [edge] ++ for(_ <- 1..(size - 2), do: line) ++ [edge]
-  end
-
-  def mark_visibility_map_horizontally([_ | viz_row_rest], [lowest | tree_row_rest]) do
-    [-1 | mark_visibility_map_horizontally(viz_row_rest, tree_row_rest, lowest)]
-  end
-
-  def mark_visibility_map_horizontally(
-        [viz_lowest | viz_row_rest],
-        [tree_height | tree_row_rest] = tree_row,
-        lowest
-      ) do
-    viz_lowest = Enum.min([lowest, viz_lowest])
-    lowest = Enum.max([lowest, tree_height])
-    [viz_lowest | mark_visibility_map_horizontally(viz_row_rest, tree_row_rest, lowest)]
-  end
-
-  def mark_visibility_map_horizontally(viz_row, _, _) do
-    viz_row
-  end
-
-  def visibility_map(trees) do
-    IO.inspect(trees, label: "initial trees")
-    size = length(trees)
-    visibility_map = for _ <- 1..size, do: for(_ <- 1..size, do: 9)
-    IO.inspect(visibility_map, label: "initial_v_map", charlists: :as_lists)
-    # horizontal scanning
-    visibility_map =
-      for {viz_row, tree_row} <- Enum.zip(visibility_map, trees) do
-        mark_visibility_map_horizontally(viz_row, tree_row)
-        |> Enum.reverse()
-        |> mark_visibility_map_horizontally(Enum.reverse(tree_row))
-        |> Enum.reverse()
-      end
-
-    # transpose
-    visibility_map =
-      visibility_map
-      |> List.zip()
-      |> Enum.map(&Tuple.to_list/1)
-
-    trees =
-      trees
-      |> List.zip()
-      |> Enum.map(&Tuple.to_list/1)
-
-    # vertical scanning
-    visibility_map =
-      for {viz_row, tree_row} <- Enum.zip(visibility_map, trees) do
-        mark_visibility_map_horizontally(viz_row, tree_row)
-        |> Enum.reverse()
-        |> mark_visibility_map_horizontally(Enum.reverse(tree_row))
-        |> Enum.reverse()
-      end
-      |> IO.inspect(label: "viz map")
-
-    # transpose
-    visibility_map =
-      visibility_map
-      |> List.zip()
-      |> Enum.map(&Tuple.to_list/1)
-      |> IO.inspect(label: "final viz")
-
-    trees =
-      trees
-      |> List.zip()
-      |> Enum.map(&Tuple.to_list/1)
-      |> IO.inspect(label: "final trees")
-
-    # height comparison
-    for {viz_row, tree_row} <- Enum.zip(visibility_map, trees) do
-      for {viz_height, height} <- Enum.zip(viz_row, tree_row) do
-        cond do
-          height > viz_height -> 1
-          true -> 0
-        end
-      end
-    end
-  end
-
-  def visible_from_left(trees, nrow, 0), do: true
-
-  def visible_from_left(trees, nrow, ncol) do
-    height = trees |> Enum.at(nrow) |> Enum.at(ncol)
-
-    0..(ncol - 1)
-    |> Enum.all?(fn nncol -> trees |> Enum.at(nrow) |> Enum.at(nncol) < height end)
-  end
-
-  def visible_from_top(trees, 0, ncol), do: true
-
-  def visible_from_top(trees, nrow, ncol) do
-    height = trees |> Enum.at(nrow) |> Enum.at(ncol)
-
-    0..(nrow - 1)
-    |> Enum.all?(fn nnrow -> trees |> Enum.at(nnrow) |> Enum.at(ncol) < height end)
-  end
-
-  def visible_from_right(trees, nrow, ncol) when ncol == length(trees) - 1, do: true
-
-  def visible_from_right(trees, nrow, ncol) do
-    height = trees |> Enum.at(nrow) |> Enum.at(ncol)
-
-    0..(ncol - 1)
-    |> Enum.all?(fn nncol -> trees |> Enum.at(nrow) |> Enum.at(nncol) < height end)
-  end
-
-  def visible_from_bottom(trees, nrow, ncol) do
-    size = length(trees)
-
-    cond do
-      nrow == size - 1 ->
-        true
-
-      trees |> Enum.at(nrow + 1) |> Enum.at(ncol) >= trees |> Enum.at(nrow) |> Enum.at(ncol) ->
-        false
-
-      true ->
-        visible_from_left(trees, nrow + 1, ncol)
-    end
-  end
-
-  def visible(trees, nrow, ncol) do
-    size = length(trees)
-
-    cond do
-      visible_from_left(trees, nrow, ncol) -> 1
-      visible_from_top(trees, nrow, ncol) -> 1
-      visible_from_right(trees, nrow, ncol) -> 1
-      visible_from_bottom(trees, nrow, ncol) -> 1
-      true -> 0
-    end
-  end
-
-  def xxxvisible(trees, visibles, nrow, ncol) do
-    size = length(trees)
-
-    cond do
-      ncol == 0 ->
-        1
-
-      ncol == size - 1 ->
-        1
-
-      nrow == 0 ->
-        1
-
-      nrow == size - 1 ->
-        1
-
-      visibles |> Enum.at(nrow) |> Enum.at(ncol) == 1 ->
-        1
-
-      visibles |> Enum.at(nrow) |> Enum.at(ncol - 1) == 1 &&
-          trees |> Enum.at(nrow) |> Enum.at(ncol - 1) < trees |> Enum.at(nrow) |> Enum.at(ncol) ->
-        1
-
-      visibles |> Enum.at(nrow) |> Enum.at(ncol + 1) == 1 &&
-          trees |> Enum.at(nrow) |> Enum.at(ncol + 1) < trees |> Enum.at(nrow) |> Enum.at(ncol) ->
-        1
-
-      visibles |> Enum.at(nrow - 1) |> Enum.at(ncol) == 1 &&
-          trees |> Enum.at(nrow - 1) |> Enum.at(ncol) < trees |> Enum.at(nrow) |> Enum.at(ncol) ->
-        1
-
-      visibles |> Enum.at(nrow + 1) |> Enum.at(ncol) == 1 &&
-          trees |> Enum.at(nrow + 1) |> Enum.at(ncol) < trees |> Enum.at(nrow) |> Enum.at(ncol) ->
-        1
-
-      true ->
-        0
-    end
-  end
-
-  # def mark_horizontal_visibles(trees, visibles) do
-  #  size = length(trees)
-  #  for nrow <- 0..(size - 1), 
-  #    do: for ncol <- 0..(size - 1),
-  #      do: visible(trees, visibles, nrow, ncol)
-  # end
-  def mark_visibles(trees) do
-    size = length(trees)
-
-    for nrow <- 0..(size - 1),
-        do:
-          for(
-            ncol <- 0..(size - 1),
-            do: visible(trees, nrow, ncol)
-          )
-  end
-
-  # def mark_visibles_loop(trees, visibles) do
-  #  marked_visibles = mark_horizontal_visibles(trees, visibles)
-  #  if marked_visibles == visibles do
-  #    marked_visibles
-  #  else
-  #    mark_visibles_loop(trees, marked_visibles)
-  #  end
-  # end
-
   def to_data_model(trees) do
-    size = length(trees)
-
     left_right =
       for {row, y} <- Enum.with_index(trees),
           {h, x} <- Enum.with_index(row),
-          {left, [height | right]} = Enum.split(row, x),
+          {left, [_ | right]} = Enum.split(row, x),
           into: %{} do
-        {{x, y}, %{height: height, trees_lines_to_edge: [Enum.reverse(left), right]}}
+        {{x, y}, %{pos: {x, y}, h: h, trees_lines_to_edge: [Enum.reverse(left), right]}}
       end
 
     for {col, x} <- Enum.with_index(transpose(trees)),
-        {h, y} <- Enum.with_index(col),
-        {above, [_ | below]} = Enum.split(col, y),
+        {_, y} <- Enum.with_index(col),
+        {up, [_ | down]} = Enum.split(col, y),
         reduce: left_right do
       acc ->
         Map.update(
@@ -305,7 +139,7 @@ defmodule C do
           {x, y},
           nil,
           fn data ->
-            %{data | trees_lines_to_edge: [Enum.reverse(above), below | data.trees_lines_to_edge]}
+            %{data | trees_lines_to_edge: [Enum.reverse(up), down | data.trees_lines_to_edge]}
           end
         )
     end
@@ -317,22 +151,41 @@ defmodule C do
     |> Enum.map(&Tuple.to_list/1)
   end
 
-  def visible?(%{height: h, trees_lines_to_edge: trees_lines_to_edge}) do
+  def visible?(%{h: h, trees_lines_to_edge: trees_lines_to_edge}) do
     trees_lines_to_edge
     |> Enum.any?(fn
       trees_line -> Enum.all?(trees_line, fn tree -> tree < h end)
     end)
   end
+
+  def scenic_score(%{h: h, trees_lines_to_edge: trees_lines_to_edge}) do
+    trees_lines_to_edge
+    |> Enum.map(fn trees_line -> viewing_distance(trees_line, h) end)
+    |> Enum.reduce(fn d, acc -> d * acc end)
+  end
+
+  def viewing_distance([], _), do: 0
+  def viewing_distance([tree | _rest], h) when tree >= h, do: 1
+  def viewing_distance([_tree | rest], h), do: 1 + viewing_distance(rest, h)
 end
 
-Aoc.input()
-# example_input
-|> String.split("\n", trim: true)
-|> Enum.map(fn line -> String.graphemes(line) |> Enum.map(&String.to_integer/1) end)
-|> C.to_data_model()
-|> Map.values()
+trees =
+  Aoc.input()
+  # example_input
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn line -> String.graphemes(line) |> Enum.map(&String.to_integer/1) end)
+  |> C.to_data_model()
+  |> Map.values()
+
+trees
 |> Enum.count(fn tree -> C.visible?(tree) end)
 |> IO.inspect(label: "part 1")
+
+trees
+|> Enum.map(fn tree -> Map.put(tree, :scsc, C.scenic_score(tree)) end)
+|> Enum.max_by(& &1.scsc)
+|> then(& &1.scsc)
+|> IO.inspect(label: "\npart 2")
 ```
 
 ```elixir
