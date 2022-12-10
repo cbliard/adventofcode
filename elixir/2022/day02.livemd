@@ -1,6 +1,6 @@
 <!-- livebook:{"persist_outputs":true} -->
 
-# Untitled notebook
+# Day 2
 
 ## Day 2: Rock Paper Scissors
 
