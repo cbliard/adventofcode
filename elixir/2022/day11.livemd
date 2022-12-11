@@ -300,6 +300,7 @@ example_solution_part2 = :tbd
 defmodule Item do
   defstruct [
     :worry_level,
+    :common_divisor,
     :holder
   ]
 end
@@ -316,14 +317,16 @@ defmodule Monkey do
   ]
 
   def inspect_item(monkey, item) do
-    new_wl = div(monkey.operation.(item.worry_level), 3)
+    # IO.puts("Monkey #{monkey.n} inspecting item #{inspect(item, charlists: :as_lists)}")
+    # IO.puts("  Worry level: #{worry_level}")
+    new_wl = monkey.operation.(item.worry_level)
+    # IO.puts("  New worry level: #{new_wl}")
+    new_wl = rem(new_wl, item.common_divisor)
+
     result = rem(new_wl, monkey.divisor)
     holder = if result == 0, do: monkey.n_if_true, else: monkey.n_if_false
-
-    %Item{
-      worry_level: new_wl,
-      holder: holder
-    }
+    %Item{item | worry_level: new_wl, holder: holder}
+    # |> tap(&IO.puts("  After inspection, item: #{inspect(&1, charlists: :as_lists)}"))
   end
 
   def to_s(items) do
@@ -337,12 +340,12 @@ defmodule Monkey do
       items
       |> Enum.split_with(fn item -> item.holder == monkey.n end)
 
-    # IO.puts("Monkey #{monkey.n} inspecting items #{to_s(monkey_items)}")
+    # IO.puts("Monkey #{monkey.n} inspecting items #{inspect(monkey_items, charlists: :as_lists)}")
     monkey_items =
       monkey_items
       |> Enum.map(fn item -> inspect_item(monkey, item) end)
 
-    # |> C.inspect()
+    # |> C.i()
     new_monkey = %Monkey{monkey | inspections: monkey.inspections + length(monkey_items)}
     new_items = rest ++ monkey_items
     {new_monkey, new_items}
@@ -353,12 +356,7 @@ defmodule C do
   def parse_items(input, holder) do
     input
     |> String.split(", ")
-    |> Enum.map(fn wl ->
-      %Item{
-        worry_level: String.to_integer(wl),
-        holder: holder
-      }
-    end)
+    |> Enum.map(&String.to_integer(&1))
   end
 
   def parse_operation("* old"), do: fn old -> old * old end
@@ -376,16 +374,16 @@ defmodule C do
     ] = String.split(input, "\n")
 
     %Monkey{
-      n: n,
+      n: String.to_integer(n),
       starting_items: parse_items(items_input, n),
       operation: parse_operation(operation),
       divisor: String.to_integer(divisor),
-      n_if_true: n_if_true,
-      n_if_false: n_if_false
+      n_if_true: String.to_integer(n_if_true),
+      n_if_false: String.to_integer(n_if_false)
     }
   end
 
-  def inspect(v, opts \\ []) do
+  def i(v, opts \\ []) do
     defaults = [binaries: :as_strings, charlists: :as_lists]
     IO.inspect(v, Keyword.merge(defaults, opts))
   end
@@ -410,26 +408,30 @@ monkeys =
   |> String.trim_trailing()
   |> String.split("\n\n", trim: true)
   |> Enum.map(&C.parse_monkey/1)
+  |> C.i()
 
-# |> C.inspect()
+common_divisor =
+  for(monkey <- monkeys, do: monkey.divisor)
+  |> Enum.reduce(&(&1 * &2))
+  |> IO.inspect()
 
 items =
   monkeys
-  |> Enum.flat_map(& &1.starting_items)
+  |> Enum.flat_map(fn monkey ->
+    monkey.starting_items
+    |> Enum.map(fn worry_level ->
+      %Item{
+        worry_level: worry_level,
+        common_divisor: common_divisor,
+        holder: monkey.n
+      }
+    end)
+  end)
+  |> C.i()
 
-1..20
+1..10_000
 |> Enum.reduce({monkeys, items}, fn _round, acc ->
   C.round(acc)
-end)
-|> tap(fn {monkeys, items} ->
-  monkeys
-  |> Enum.each(fn monkey ->
-    {monkey_items, _rest} =
-      items
-      |> Enum.split_with(fn item -> item.holder == monkey.n end)
-
-    IO.puts("Monkey #{monkey.n}: #{Monkey.to_s(monkey_items)}")
-  end)
 end)
 |> tap(fn {monkeys, items} ->
   monkeys
@@ -441,7 +443,7 @@ end)
 |> Enum.map(& &1.inspections)
 |> Enum.sort(:desc)
 |> then(fn [i1, i2 | _] -> i1 * i2 end)
-|> C.inspect(label: "part 1")
+|> C.i(label: "part 2")
 ```
 
 ```elixir
